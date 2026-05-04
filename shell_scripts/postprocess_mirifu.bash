@@ -48,12 +48,24 @@ for ASN in *crf_asn.json
 do strun cube_build $ASN --output_dir cubes/ch1wcs --cube_pa=250.42338204969806 --scalexy 0.13 --ra_center 83.83535169747073 --dec_center -5.419729392828107  --nspax_x 213 --nspax_y 41
 done
 
+# Cubes matched to ch4
+mkdir -p cubes/ch4wcs
+for ASN in *crf_asn.json
+do strun cube_build $ASN --output_dir cubes/ch4wcs --cube_pa=250.42338204969806 --scalexy 0.35 --ra_center 83.83535169747073 --dec_center -5.419729392828107 --nspax_x 41 --nspax_y 9
+done
+
 # WCS correction for default cubes
 python3 -m pdrs4all.postprocess.mrs_simple_wcscorr cubes/default/*s3d.fits --output_dir cubes/default_wcscorr
 python3 -m pdrs4all.postprocess.mrs_simple_wcscorr cubes/ch1wcs/*s3d.fits --output_dir cubes/ch1wcs_wcscorr
+# ideally we want to apply the WCS correction BEFORE building the cubes, or by creating the
+# "shifts" json file (see cube_build step documentation)
+python3 -m pdrs4all.postprocess.mrs_simple_wcscorr cubes/ch4wcs/*s3d.fits --output_dir cubes/ch4wcs_wcscorr
 
 # templates extracted from different versions of the cubes
 extract_templates "$ROOT"/regions/aper_T_DF_extraction.reg cubes/default/*s3d.fits --template_names "HII" "Atomic" "DF3" "DF2" "DF1" -o templates/default_nostitch.ecsv
 extract_templates "$ROOT"/regions/aper_T_DF_extraction.reg cubes/default/*s3d.fits --template_names "HII" "Atomic" "DF3" "DF2" "DF1" --apply_offsets --reference_segment 0 -o templates/default_addstitch.ecsv
 extract_templates "$ROOT"/regions/aper_T_DF_extraction.reg cubes/default_wcscorr/*s3d.fits --template_names "HII" "Atomic" "DF3" "DF2" "DF1" -o templates/default_wcscorr_nostitch.ecsv
 extract_templates "$ROOT"/regions/aper_T_DF_extraction.reg cubes/default_wcscorr/*s3d.fits --template_names "HII" "Atomic" "DF3" "DF2" "DF1" --apply_offsets --reference_segment 0 -o templates/default_wcscorr_addstitch.ecsv
+
+# naive ch4 stitch for now. Possible improvements: use better ch4 cubes (built using offsets to
+# correct WCS), and using additive or multiplicative flux corrections
