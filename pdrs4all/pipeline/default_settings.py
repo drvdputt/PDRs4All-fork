@@ -67,7 +67,8 @@ def pipeline_class_and_options_dict(stage, instrument, output_dir):
             class_name = Spec2Pipeline
             # let's try built-in nsclean with the default mask for now.
             # To disable nsclean during a run, use --custom_options.
-            options["steps"] = {"nsclean": skiptrue}
+            # options["steps"] = {"nsclean": skiptrue}
+            # nsclean removed from stage 2 since pipeline 2.0
         if stage == 3:
             class_name = Spec3Pipeline
             options["steps"] = {
