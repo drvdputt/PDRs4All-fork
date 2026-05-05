@@ -223,7 +223,7 @@ def mrs_wcscorr_using_proplyd(images, current_wcss):
         )
         delta_ra_dec_abc.append(delta_ra_dec)
 
-    print("offsets to be applied are", delta_ra_dec_abc)
+    print("offsets to be applied for SHORT/MEDIUM/LONG are", delta_ra_dec_abc)
 
     # to the 12 bands, apply the offsets as 0 1 2, 0 1 2, ...
     new_wcss = []

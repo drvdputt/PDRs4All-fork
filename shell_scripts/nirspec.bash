@@ -8,7 +8,7 @@ set -x
 # J is the number of processes for stage 1 and 2. The recommended limit, is to make sure you
 # have about 10 GB of RAM per process. For the science cluster at ST, with 512 GB RAM, I use
 # J=48.
-J=1
+J=4
 
 # Use these if there's too much multithreading. On machines with high core counts, numpy etc can
 # sometimes launch a large number of threads. This doesn't give much speedup if multiprocessing
@@ -98,14 +98,14 @@ parallel_shorthand $J sci_1
 # Therefore we keep nirspec_nsclean.bash around for now.
 
 # background stage 2
-pipeline_jobs -s 2 -i $OUT_BKGI -o $OUT_BKG $IN_BKG
+pipeline_jobs -s 2 --custom_options v5_settings.json -i $OUT_BKGI -o $OUT_BKG $IN_BKG
 mv strun_calwebb_spec2_jobs.sh jobs_bkg_2.sh
 parallel_shorthand 1 bkg_2
 
 # science stage 2
-pipeline_jobs -s 2 -i $OUT_SCII -o $OUT_SCI $IN_SCI
+pipeline_jobs -s 2 --custom_options v5_settings.json -i $OUT_SCII -o $OUT_SCI $IN_SCI
 mv strun_calwebb_spec2_jobs.sh jobs_sci_2.sh
-parallel_shorthand 4 sci_2
+parallel_shorthand $J sci_2
 
 # science stage 3
 pipeline_jobs -s 3 --mosaic -b $OUT_BKG -o $OUT_SCI $IN_SCI
