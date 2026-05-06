@@ -291,7 +291,7 @@ def merge_1d(ss):
     )
 
 
-def merge_nd_memfriendly(ss):
+def merge_nd(ss):
     """Memory-friendly version.
 
     Merge a list of sorted (by wavelength) Spectrum segments

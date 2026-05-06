@@ -123,7 +123,7 @@ def write_cube_wavetab_jwst_s3d_format(
         (0, flux_array.shape[0] - 1),
     )
 
-    ifucube_model.write(fits_fn)
+    ifucube_model.save(fits_fn)
 
 
 def write_s3d_with_new_crval(output_fn, original_fn, crval):
@@ -145,7 +145,7 @@ def write_s3d_with_new_crval(output_fn, original_fn, crval):
     cube_dm = datamodels.open(original_fn)
     cube_dm.meta.wcsinfo.crval1 = crval[0]
     cube_dm.meta.wcsinfo.crval2 = crval[1]
-    cube_dm.write(output_fn)
+    cube_dm.save(output_fn)
 
 
 def write_i2d(fits_fn, array, wcs, unit=u.MJy / u.sr):

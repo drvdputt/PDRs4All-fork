@@ -74,7 +74,7 @@ def main(args):
     s3ds.sort(key=lambda x: x.spectral_axis.value[0])
     nirspec_cwcs = WCS(s3ds[0].meta["header"]).celestial
 
-    s3dm = spectral_segments.merge_nd_memfriendly(s3ds)
+    s3dm = spectral_segments.merge_nd(s3ds)
     custom_io.write_cube_s1d_wavetab_jwst_s3d_format(
         naive_stitch_fits, s3dm, nirspec_cwcs
     )

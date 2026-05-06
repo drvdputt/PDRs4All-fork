@@ -1,7 +1,7 @@
 from specutils import Spectrum
 from astropy.wcs import WCS
 from argparse import ArgumentParser
-from pdrs4all.postprocess.spectral_segments import merge_nd, merge_nd_memfriendly
+from pdrs4all.postprocess.spectral_segments import merge_nd
 from pdrs4all.postprocess.custom_io import write_cube_s1d_wavetab_jwst_s3d_format
 
 if __name__ == "__main__":
@@ -27,7 +27,6 @@ if __name__ == "__main__":
 
     ap.add_argument("input_s3d_fits", nargs="+")
     ap.add_argument("-o", "--output_s3d_fits", default="naive_merged_s3d.fits")
-    ap.add_argument("--memory_friendly", action="store_true")
     args = ap.parse_args()
 
     s3ds = [Spectrum.read(fn) for fn in args.input_s3d_fits]
@@ -37,7 +36,7 @@ if __name__ == "__main__":
     # it will be assumed that all cubes have the same celestial WCS.
     yx_shapes = []
     for s3d in s3ds:
-        yx_shape = s3d.shape
+        yx_shape = list(s3d.shape)
         del yx_shape[s3d.spectral_axis_index]
         yx_shapes.append(yx_shape)
 
@@ -49,7 +48,7 @@ if __name__ == "__main__":
         f"Opened cubes with shape {yx_shapes}. Starting merge. This may take a lot of memory"
     )
     cwcs = WCS(s3ds[0].meta["header"]).celestial
-    s3dm = merge_nd_memfriendly(s3ds)
+    s3dm = merge_nd(s3ds)
 
     print(f"Merge finished. Writing result to {args.output_s3d_fits}.")
     write_cube_s1d_wavetab_jwst_s3d_format(args.output_s3d_fits, s3dm, cwcs)
