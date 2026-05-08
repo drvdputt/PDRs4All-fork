@@ -49,18 +49,23 @@ for ASN in *crf_asn.json; do
     python3 -m pdrs4all.postprocess.smart_wcscorr $ASN
 done
 
-mkdir -p ../cubes/default_offset ../cubes/ch1wcs ../cubes/ch1wcs_offset ../cubes/ch4wcs ../ch4wcs_offset
+mkdir -p ../cubes/default_offset ../cubes/ch1wcs ../cubes/ch1wcs_offset ../cubes/ch4wcs ../cubes/ch4wcs_offset
 PAOPT="--cube_pa=250.42338204969806"
 CH1OPT="${PAOPT} --scalexy 0.13 --ra_center 83.83535169747073 --dec_center -5.419729392828107  --nspax_x 213 --nspax_y 41"
 CH4OPT="${PAOPT} --cube_pa=250.42338204969806 --scalexy 0.35 --ra_center 83.83535169747073 --dec_center -5.419729392828107 --nspax_x 91 --nspax_y 29"
+
+> cube_build_jobs.sh
 for ASN in *crf_asn.json; do
     OFFSET_FILE="${ASN%.json}_offsets.asdf" 
-    strun cube_build $ASN --output_dir ../cubes/default_offset --cube_pa=250.42338204969806 --offset_file $OFFSET_FILE
-    strun cube_build $ASN --output_dir ../cubes/ch1wcs $CH1OPT
-    strun cube_build $ASN --output_dir ../cubes/ch1wcs_offset $CH1OPT $OFFSET_FILE
-    strun cube_build $ASN --output_dir ../cubes/ch4wcs $CH4OPT
-    strun cube_build $ASN --output_dir ../cubes/ch4wcs_offset $CH4OPT $OFFSET_FILE
+    echo strun cube_build $ASN --output_dir ../cubes/default_offset --cube_pa=250.42338204969806 --offset_file $OFFSET_FILE >> cube_build_jobs.sh
+    echo strun cube_build $ASN --output_dir ../cubes/ch1wcs $CH1OPT >> cube_build_jobs.sh
+    echo strun cube_build $ASN --output_dir ../cubes/ch1wcs_offset $CH1OPT --offset_file $OFFSET_FILE >> cube_build_jobs.sh
+    echo strun cube_build $ASN --output_dir ../cubes/ch4wcs $CH4OPT >> cube_build_jobs.sh
+    echo strun cube_build $ASN --output_dir ../cubes/ch4wcs_offset $CH4OPT --offset_file $OFFSET_FILE >> cube_build_jobs.sh
 done
+
+# needs about 4 GB per process, so 2 should be a save option; can increase if more cores/ram
+parallel -j 2 :::: cube_build_jobs.sh
 
 # Simple WCS correction for default cubes: this does not change the data, only the WCS prameters -> after correcting, no longer aligned.
 # python3 -m pdrs4all.postprocess.mrs_simple_wcscorr
@@ -81,4 +86,5 @@ extract_templates "$ROOT"/regions/aper_T_DF_extraction.reg cubes/default_offset/
 
 # naive ch4 stitch for now. Possible improvements: use better ch4 cubes (built using offsets to
 # correct WCS), and using additive or multiplicative flux corrections
+python3 -m pdrs4all.postprocess.naive_cube_merge cubes/ch1wcs_offset/*s3d.fits -o cubes/ch1wcs_offset_stitched_s3d.fits
 python3 -m pdrs4all.postprocess.naive_cube_merge cubes/ch4wcs_offset/*s3d.fits -o cubes/ch4wcs_offset_stitched_s3d.fits
