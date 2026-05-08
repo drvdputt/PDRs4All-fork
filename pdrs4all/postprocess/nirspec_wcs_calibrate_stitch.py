@@ -135,7 +135,7 @@ def main(args):
             setattr(cube_dm.meta, k, value)
 
         out_fn = Path(fn).name.replace('_s3d.fits', '_wcscorr_s3d.fits')
-        cube_dm.write(output_path / out_fn)
+        cube_dm.save(output_path / out_fn)
 
 
 if __name__ == "__main__":
